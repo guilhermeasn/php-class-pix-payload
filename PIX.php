@@ -29,7 +29,13 @@ class PIX {
 
     /**
      * Chave PIX
-     *
+     * 
+     * *** Formatos validos ***
+     * EMAIL: fulano_da_silva.recebedor@example.com
+     * CPF: 12345678900
+     * CNPJ: 00038166000105
+     * TELEFONE: +5561912345678
+     * 
      * @var string
      */
     private $key;
@@ -73,10 +79,10 @@ class PIX {
      */
     public function __construct(string $key, string $merchant, string $city, string $code, float $amount) {
         
-        $this->key = preg_replace('/\s/is', '', $key);
+        $this->key = substr(preg_replace('/\s/is', '', $key), 0, 99);
         $this->merchant = substr(preg_replace('/[^a-z ]/is', '', $merchant), 0, 25);  # max 25 letras
         $this->city = substr(preg_replace('/[^a-z ]/is', '', $city), 0, 15);  # max 15 letras
-        $this->code = substr(preg_replace('/\W/is', '', $code), 0, 20);  # max 20 letras/numeros sem espacos
+        $this->code = substr(preg_replace('/[^a-z0-9]/is', '', $code), 0, 20);  # max 20 letras/numeros sem espacos
         $this->amount = (string) number_format($amount, 2, '.', '');
         
     }
@@ -254,12 +260,11 @@ class PIX {
     /**
      * CRC16
      * ID 63
-     * * fix lenght 04
      *
      * @return string
      */
     private function getInitCRC16() : string {
-        return '63' . '04';
+        return '63';
     }
 
     /**
@@ -280,7 +285,9 @@ class PIX {
                   .$this->getAdditionalData()
                   .$this->getInitCRC16();
 
-        return $payload . self::CRC16($payload);
+        $crclen = self::padlen(self::CRC16($payload . '04'));
+
+        return $payload . $crclen . self::CRC16($payload . $crclen);
 
     }
 
