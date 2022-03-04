@@ -35,6 +35,7 @@ class PIX {
      * CPF: 12345678900
      * CNPJ: 00038166000105
      * TELEFONE: +5561912345678
+     * ALEATORIA: 123e4567-e12b-12d1-a456-426655440000
      * 
      * @var string
      */
