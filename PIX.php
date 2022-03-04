@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+// namespace App;
 
 /**
  * Classe para gerar o payload do qrcode estatico do PIX
