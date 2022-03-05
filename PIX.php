@@ -24,8 +24,11 @@ class PIX {
     /**
      *  CRC-16-CCITT-FFFF de acordo com o BACEN
      */
-    const CRC16_POLYNOMIAL = 0x1021;
-    const CRC16_INITIAL = 0xFFFF;
+    const CRC16_POLYNOMIAL1 = 0x1021;
+    const CRC16_POLYNOMIAL2 = 0xFFFF;
+    const CRC16_POLYNOMIAL3 = 0x10000;
+    const CRC16_POLYNOMIAL4 = 0xFFFF;
+    const CRC16_DEFAULT_LENGTH = '04';
 
     /**
      * Chave PIX
@@ -56,6 +59,13 @@ class PIX {
     private $city;
 
     /**
+     * CEP de quem recebe o PIX
+     *
+     * @var string
+     */
+    private $cep = null;
+
+    /**
      * Codigo para identificacao posterior do PIX
      *
      * @var string
@@ -64,10 +74,11 @@ class PIX {
 
     /**
      * Valor do PIX
+     * (opcional)
      *
-     * @var string
+     * @var string|null
      */
-    private $amount;
+    private $amount = null;
 
     /**
      * Carrega os dados do PIX
@@ -75,18 +86,47 @@ class PIX {
      * @param string $key
      * @param string $merchant
      * @param string $city
+     * @param string $cep
      * @param string $code
-     * @param float $amount
+     * @param float|null $amount
      */
-    public function __construct(string $key, string $merchant, string $city, string $code, float $amount) {
+    public function __construct(string $key, string $merchant, string $city, string $cep, string $code, ?float $amount = null) {
         
+        // Dados obrigatorios
+
         $this->key = substr(preg_replace('/\s/is', '', $key), 0, 99);
-        $this->merchant = substr(preg_replace('/[^a-z ]/is', '', $merchant), 0, 25);  # max 25 letras
-        $this->city = substr(preg_replace('/[^a-z ]/is', '', $city), 0, 15);  # max 15 letras
-        $this->code = substr(preg_replace('/[^a-z0-9]/is', '', $code), 0, 20);  # max 20 letras/numeros sem espacos
-        $this->amount = (string) number_format($amount, 2, '.', '');
+        $this->merchant = substr(self::removeAccent($merchant, '/[^a-z ]/is'), 0, 25);  # max 25 letras
+        $this->city = substr(self::removeAccent($city, '/[^a-z ]/is'), 0, 15);  # max 15 letras
+        $this->cep = preg_replace('/[^0-9]/is', '', $cep);
+        $this->code = strtoupper(substr(self::removeAccent($code, '/[^a-z0-9]/is'), 0, 20));  # max 20 letras/numeros sem espacos
+
+        // Dados opcionais
+
+        if(!is_null($amount)) {
+            $this->amount = (string) number_format($amount, 2, '.', '');
+        }
         
     }
+
+    /**
+     * Altera ou remove caracteres acentuados e especiais 
+     *
+     * @param string $string
+     * @return string
+     */
+    public static function removeAccent(string $string, string $filter_pattern = '/[^\w\s]/is') : string {
+
+		$string = html_entity_decode($string);
+
+		$search = ['á','à','ä','â','ã','Á','À','Ä','Â','Ã','é','è','ë','ê','É','È','Ë','Ê','í','ì','ï','î','Í','Ì','Ï','Î','ó','ò','ö','ô','õ','Ó','Ò','Ö','Ô','Õ','ú','ù','ü','û','Ú','Ù','Ü','Û','ç','Ç','&','@'];
+		$replace = ['a','a','a','a','a','A','A','A','A','A','e','e','e','e','E','E','E','E','i','i','i','i','I','I','I','I','o','o','o','o','o','O','O','O','O','O','u','u','u','u','U','U','U','U','c','C','e','a'];
+		
+        $string = str_replace($search, $replace, $string);
+		$string = preg_replace($filter_pattern, '', $string);
+
+		return $string;
+
+	}
 
     /**
      * Obtem todos os dados
@@ -106,6 +146,7 @@ class PIX {
                 'key' => $this->key,
                 'merchant' => $this->merchant,
                 'city' => $this->city,
+                'cep' => $this->cep,
                 'code' => $this->code,
                 'amount' => $this->amount
             ],
@@ -133,23 +174,23 @@ class PIX {
     }
 
     /**
-     * Calcula o CRC16 e retorna os 4 caracteres principais
+     * Calcula o Checksum CRC16
      *
      * @param string $subject
      * @return string
      */
     private static function CRC16(string $subject) : string {
         
-        $polynomial = self::CRC16_POLYNOMIAL;
-        $result = self::CRC16_INITIAL;
+        $polynomial = self::CRC16_POLYNOMIAL1;
+        $result = self::CRC16_POLYNOMIAL2;
     
         // Checksum 
         if(($length = strlen($subject)) > 0) {
             for($offset = 0; $offset < $length; $offset++) {
                 $result ^= (ord($subject[$offset]) << 8);
                 for ($bitwise = 0; $bitwise < 8; $bitwise++) {
-                    if(($result <<= 1) & 0x10000) $result ^= $polynomial;
-                    $result &= self::CRC16_INITIAL;
+                    if(($result <<= 1) & self::CRC16_POLYNOMIAL3) $result ^= $polynomial;
+                    $result &= self::CRC16_POLYNOMIAL4;
                 }
             }
         }
@@ -207,13 +248,13 @@ class PIX {
     }
 
     /**
-     * Transaction Amount
+     * Transaction Amount (opcional)
      * ID 54
      *
      * @return string
      */
     private function getTransactionAmount() : string {
-        return '54' . self::padlen($this->amount) . $this->amount;
+        return is_null($this->amount) ? '' : '54' . self::padlen($this->amount) . $this->amount;
     }
 
     /**
@@ -244,6 +285,16 @@ class PIX {
      */
     private function getMerchantCity() : string {
         return '60' . self::padlen($this->city) . $this->city;
+    }
+
+    /**
+     * Merchant CEP
+     * ID 61
+     *
+     * @return string
+     */
+    private function getMerchantCep() : string {
+        return '61' . self::padlen($this->cep) . $this->cep;
     }
 
     /**
@@ -283,12 +334,19 @@ class PIX {
                   .$this->getCountryCode()
                   .$this->getMerchantName()
                   .$this->getMerchantCity()
+                  .$this->getMerchantCep()
                   .$this->getAdditionalData()
                   .$this->getInitCRC16();
 
-        $crclen = self::padlen(self::CRC16($payload . '04'));
+        $crc16 = self::CRC16($payload . self::CRC16_DEFAULT_LENGTH);
+        $crc16len = self::padlen($crc16);
 
-        return $payload . $crclen . self::CRC16($payload . $crclen);
+        // confirma o tamanho padrao do crc16
+        if($crc16len !== self::CRC16_DEFAULT_LENGTH) {
+            $crc16 = self::CRC16($payload . $crc16len);
+        }
+        
+        return $payload . $crc16len . $crc16;
 
     }
 
