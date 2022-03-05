@@ -109,26 +109,6 @@ class PIX {
     }
 
     /**
-     * Altera ou remove caracteres acentuados e especiais 
-     *
-     * @param string $string
-     * @return string
-     */
-    public static function removeAccent(string $string, string $filter_pattern = '/[^\w\s]/is') : string {
-        
-        $string = html_entity_decode($string);
-        
-        $search = ['á','à','ä','â','ã','Á','À','Ä','Â','Ã','é','è','ë','ê','É','È','Ë','Ê','í','ì','ï','î','Í','Ì','Ï','Î','ó','ò','ö','ô','õ','Ó','Ò','Ö','Ô','Õ','ú','ù','ü','û','Ú','Ù','Ü','Û','ç','Ç','&','@'];
-        $replace = ['a','a','a','a','a','A','A','A','A','A','e','e','e','e','E','E','E','E','i','i','i','i','I','I','I','I','o','o','o','o','o','O','O','O','O','O','u','u','u','u','U','U','U','U','c','C','e','a'];
-        
-        $string = str_replace($search, $replace, $string);
-        $string = preg_replace($filter_pattern, '', $string);
-        
-        return $string;
-    
-    }
-
-    /**
      * Obtem todos os dados
      *
      * @return array
@@ -161,43 +141,6 @@ class PIX {
      */
     public function __toString() : string {
         return $this->payload();
-    }
-
-    /**
-     * Quantidade de caracteres em uma informacao, retornando sempre 2 caracteres
-     *
-     * @param string $subject
-     * @return string
-     */
-    private static function padlen(string $subject) : string {
-        return str_pad(strlen($subject), 2, '0', STR_PAD_LEFT);
-    }
-
-    /**
-     * Calcula o Checksum CRC16
-     *
-     * @param string $subject
-     * @return string
-     */
-    private static function CRC16(string $subject) : string {
-        
-        $polynomial = self::CRC16_POLYNOMIAL1;
-        $result = self::CRC16_POLYNOMIAL2;
-    
-        // Checksum 
-        if(($length = strlen($subject)) > 0) {
-            for($offset = 0; $offset < $length; $offset++) {
-                $result ^= (ord($subject[$offset]) << 8);
-                for ($bitwise = 0; $bitwise < 8; $bitwise++) {
-                    if(($result <<= 1) & self::CRC16_POLYNOMIAL3) $result ^= $polynomial;
-                    $result &= self::CRC16_POLYNOMIAL4;
-                }
-            }
-        }
-    
-        // Retorna o código CRC16 de 4 caracteres
-        return strtoupper(dechex($result));
-
     }
 
     /**
@@ -347,6 +290,67 @@ class PIX {
         }
         
         return $payload . $crc16len . $crc16;
+
+    }
+
+    /* Static Functions */
+
+    /**
+     * Altera ou remove caracteres acentuados e especiais 
+     *
+     * @param string $string
+     * @return string
+     */
+    public static function removeAccent(string $string, string $filter_pattern = '/[^\w\s]/is') : string {
+        
+        $string = html_entity_decode($string);
+        
+        $search = ['á','à','ä','â','ã','Á','À','Ä','Â','Ã','é','è','ë','ê','É','È','Ë','Ê','í','ì','ï','î','Í','Ì','Ï','Î','ó','ò','ö','ô','õ','Ó','Ò','Ö','Ô','Õ','ú','ù','ü','û','Ú','Ù','Ü','Û','ç','Ç','&','@'];
+        $replace = ['a','a','a','a','a','A','A','A','A','A','e','e','e','e','E','E','E','E','i','i','i','i','I','I','I','I','o','o','o','o','o','O','O','O','O','O','u','u','u','u','U','U','U','U','c','C','e','a'];
+        
+        $string = str_replace($search, $replace, $string);
+        $string = preg_replace($filter_pattern, '', $string);
+        
+        return $string;
+    
+    }
+
+    
+
+    /**
+     * Quantidade de caracteres em uma informacao, retornando sempre 2 caracteres
+     *
+     * @param string $subject
+     * @return string
+     */
+    private static function padlen(string $subject) : string {
+        return str_pad(strlen($subject), 2, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Calcula o Checksum CRC16
+     *
+     * @param string $subject
+     * @return string
+     */
+    private static function CRC16(string $subject) : string {
+        
+        $polynomial = self::CRC16_POLYNOMIAL1;
+        $result = self::CRC16_POLYNOMIAL2;
+    
+        // Checksum 
+        if(($length = strlen($subject)) > 0) {
+            for($offset = 0; $offset < $length; $offset++) {
+                $result ^= (ord($subject[$offset]) << 8);
+                for ($bitwise = 0; $bitwise < 8; $bitwise++) {
+                    if(($result <<= 1) & self::CRC16_POLYNOMIAL3) $result ^= $polynomial;
+                    $result &= self::CRC16_POLYNOMIAL4;
+                }
+            }
+        }
+    
+        // Retorna o código CRC16 de 4 caracteres
+        return strtoupper(dechex($result));
 
     }
 
