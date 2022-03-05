@@ -115,18 +115,18 @@ class PIX {
      * @return string
      */
     public static function removeAccent(string $string, string $filter_pattern = '/[^\w\s]/is') : string {
-
-		$string = html_entity_decode($string);
-
-		$search = ['á','à','ä','â','ã','Á','À','Ä','Â','Ã','é','è','ë','ê','É','È','Ë','Ê','í','ì','ï','î','Í','Ì','Ï','Î','ó','ò','ö','ô','õ','Ó','Ò','Ö','Ô','Õ','ú','ù','ü','û','Ú','Ù','Ü','Û','ç','Ç','&','@'];
-		$replace = ['a','a','a','a','a','A','A','A','A','A','e','e','e','e','E','E','E','E','i','i','i','i','I','I','I','I','o','o','o','o','o','O','O','O','O','O','u','u','u','u','U','U','U','U','c','C','e','a'];
-		
+        
+        $string = html_entity_decode($string);
+        
+        $search = ['á','à','ä','â','ã','Á','À','Ä','Â','Ã','é','è','ë','ê','É','È','Ë','Ê','í','ì','ï','î','Í','Ì','Ï','Î','ó','ò','ö','ô','õ','Ó','Ò','Ö','Ô','Õ','ú','ù','ü','û','Ú','Ù','Ü','Û','ç','Ç','&','@'];
+        $replace = ['a','a','a','a','a','A','A','A','A','A','e','e','e','e','E','E','E','E','i','i','i','i','I','I','I','I','o','o','o','o','o','O','O','O','O','O','u','u','u','u','U','U','U','U','c','C','e','a'];
+        
         $string = str_replace($search, $replace, $string);
-		$string = preg_replace($filter_pattern, '', $string);
-
-		return $string;
-
-	}
+        $string = preg_replace($filter_pattern, '', $string);
+        
+        return $string;
+    
+    }
 
     /**
      * Obtem todos os dados
