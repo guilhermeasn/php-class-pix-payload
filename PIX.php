@@ -90,7 +90,7 @@ class PIX {
      * @param string $code
      * @param float|null $amount
      */
-    public function __construct(string $key, string $merchant, string $city, string $cep, string $code, ?float $amount = null) {
+    public function __construct(string $key, string $merchant, string $city, string $cep, string $code = '***', ?float $amount = null) {
         
         // Dados obrigatorios
 
