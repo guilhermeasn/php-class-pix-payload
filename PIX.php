@@ -224,7 +224,7 @@ class PIX {
      * @return string
      */
     private function getInitCRC16() : string {
-        return '63';
+        return '63' . self::CRC16_DEFAULT_LENGTH;
     }
 
     /**
@@ -245,16 +245,8 @@ class PIX {
                   .$this->getMerchantCep()
                   .$this->getAdditionalData()
                   .$this->getInitCRC16();
-
-        $crc16 = self::CRC16($payload . self::CRC16_DEFAULT_LENGTH);
-        $crc16len = self::padlen($crc16);
-
-        // confirma o tamanho padrao do crc16
-        if($crc16len !== self::CRC16_DEFAULT_LENGTH) {
-            $crc16 = self::CRC16($payload . $crc16len);
-        }
         
-        return $payload . $crc16len . $crc16;
+        return $payload . self::CRC16($payload);
 
     }
 
@@ -349,7 +341,7 @@ class PIX {
         }
     
         // Retorna o código CRC16 de 4 caracteres
-        return strtoupper(dechex($result));
+        return strtoupper(str_pad(dechex($result), self::CRC16_DEFAULT_LENGTH, '0', STR_PAD_LEFT));
 
     }
 
