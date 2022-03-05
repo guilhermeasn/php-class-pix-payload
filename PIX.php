@@ -94,11 +94,11 @@ class PIX {
         
         // Dados obrigatorios
 
-        $this->key = substr(preg_replace('/\s/is', '', $key), 0, 99);
-        $this->merchant = substr(self::removeAccent($merchant, '/[^a-z ]/is'), 0, 25);  # max 25 letras
-        $this->city = substr(self::removeAccent($city, '/[^a-z ]/is'), 0, 15);  # max 15 letras
+        $this->key = substr(preg_replace('/\s/is', '', $key), 0, 77);
+        $this->merchant = substr(self::removeAccent($merchant, '/[^a-z ]/is'), 0, 80);
+        $this->city = substr(self::removeAccent($city, '/[^a-z ]/is'), 0, 80);
         $this->cep = substr(preg_replace('/[^0-9]/is', '', $cep), 0, 8);
-        $this->code = strtoupper(substr(self::removeAccent($code, '/[^a-z0-9]/is'), 0, 20));  # max 20 letras/numeros sem espacos
+        $this->code = strtoupper(substr(self::removeAccent($code, '/[^a-z0-9]/is'), 0, 25));  # max 25 letras/numeros sem espacos
 
         // Dados opcionais
 
