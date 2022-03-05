@@ -63,7 +63,7 @@ class PIX {
      *
      * @var string
      */
-    private $cep = null;
+    private $cep;
 
     /**
      * Codigo para identificacao posterior do PIX
