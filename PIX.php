@@ -109,41 +109,6 @@ class PIX {
     }
 
     /**
-     * Obtem todos os dados
-     *
-     * @return array
-     */
-    public function toArray() : array {
-        return [
-            'config' => [
-                'PAYLOAD_FORMAT' => self::PAYLOAD_FORMAT,
-                'MERCHANT_ACCOUNT_GUI' => self::MERCHANT_ACCOUNT_GUI,
-                'MERCHANT_CATEGORY_CODE' => self::MERCHANT_CATEGORY_CODE,
-                'TRANSACTION_CURRENCY' => self::TRANSACTION_CURRENCY,
-                'COUNTRY_CODE' => self::COUNTRY_CODE
-            ],
-            'dataset' => [
-                'key' => $this->key,
-                'merchant' => $this->merchant,
-                'city' => $this->city,
-                'cep' => $this->cep,
-                'code' => $this->code,
-                'amount' => $this->amount
-            ],
-            'payload' => $this->payload()
-        ];
-    }
-
-    /**
-     * Exibe o payload
-     *
-     * @return string
-     */
-    public function __toString() : string {
-        return $this->payload();
-    }
-
-    /**
      * Payload Format Indicator
      * ID 00
      *
@@ -293,12 +258,48 @@ class PIX {
 
     }
 
+    /**
+     * Obtem todos os dados
+     *
+     * @return array
+     */
+    public function toArray() : array {
+        return [
+            'config' => [
+                'PAYLOAD_FORMAT' => self::PAYLOAD_FORMAT,
+                'MERCHANT_ACCOUNT_GUI' => self::MERCHANT_ACCOUNT_GUI,
+                'MERCHANT_CATEGORY_CODE' => self::MERCHANT_CATEGORY_CODE,
+                'TRANSACTION_CURRENCY' => self::TRANSACTION_CURRENCY,
+                'COUNTRY_CODE' => self::COUNTRY_CODE
+            ],
+            'dataset' => [
+                'key' => $this->key,
+                'merchant' => $this->merchant,
+                'city' => $this->city,
+                'cep' => $this->cep,
+                'code' => $this->code,
+                'amount' => $this->amount
+            ],
+            'payload' => $this->payload()
+        ];
+    }
+
+    /**
+     * Exibe o payload
+     *
+     * @return string
+     */
+    public function __toString() : string {
+        return $this->payload();
+    }
+
     /* Static Functions */
 
     /**
      * Altera ou remove caracteres acentuados e especiais 
      *
      * @param string $string
+     * @param string $filter_pattern
      * @return string
      */
     private static function removeAccent(string $string, string $filter_pattern = '/[^\w\s]/is') : string {
@@ -314,8 +315,6 @@ class PIX {
         return $string;
     
     }
-
-    
 
     /**
      * Quantidade de caracteres em uma informacao, retornando sempre 2 caracteres
