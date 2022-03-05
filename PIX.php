@@ -98,7 +98,7 @@ class PIX {
         $this->merchant = substr(self::removeAccent($merchant, '/[^a-z ]/is'), 0, 80);
         $this->city = substr(self::removeAccent($city, '/[^a-z ]/is'), 0, 80);
         $this->cep = substr(preg_replace('/[^0-9]/is', '', $cep), 0, 8);
-        $this->code = strtoupper(substr(self::removeAccent($code, '/[^a-z0-9]/is'), 0, 25));  # max 25 letras/numeros sem espacos
+        $this->code = strtoupper(substr(self::removeAccent($code, '/[^a-z0-9*]/is'), 0, 25));  # max 25 letras/numeros sem espacos
 
         // Dados opcionais
 
