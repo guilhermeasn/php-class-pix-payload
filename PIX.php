@@ -301,7 +301,7 @@ class PIX {
      * @param string $string
      * @return string
      */
-    public static function removeAccent(string $string, string $filter_pattern = '/[^\w\s]/is') : string {
+    private static function removeAccent(string $string, string $filter_pattern = '/[^\w\s]/is') : string {
         
         $string = html_entity_decode($string);
         
